@@ -117,8 +117,7 @@ BEGIN
         GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
         GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
     END IF;
-    
-    -- Grant to test_user if it exists (test environment)
+        -- Grant to test_user if it exists (test environment)
     IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'test_user') THEN
         GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO test_user;
         GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO test_user;
