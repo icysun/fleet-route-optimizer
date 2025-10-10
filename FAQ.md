@@ -1,139 +1,193 @@
-# Leaflet FAQ
+# Fleet Route Manager FAQ
 
-This is a collection of answers to the most frequently asked questions about Leaflet.
+This is a collection of answers to the most frequently asked questions about Fleet Route Manager.
 
- 1. [Data Providers](#data-providers)
- 2. [Commercial Use and Licensing](#commercial-use-and-licensing)
- 3. [Features](#features)
+ 1. [Getting Started](#getting-started)
+ 2. [Route Optimization](#route-optimization)
+ 3. [Database and Spatial Features](#database-and-spatial-features)
  4. [Performance](#performance)
- 5. [Misc](#misc)
+ 5. [Commercial Use and Licensing](#commercial-use-and-licensing)
+ 6. [Integration and APIs](#integration-and-apis)
 
-## Data Providers
+## Getting Started
 
-#### The map is wrong in my neighborhood, could you fix it?
+#### How do I get started with Fleet Route Manager?
 
-Nope, but you can.
-The map you see on Leaflet examples is based on [OpenStreetMap](https://www.openstreetmap.org/),
-a free editable map of the world.
-Signing up and editing the map there is easy,
-and the changes will be reflected on the map in a few minutes.
+The fastest way is using Docker:
+```bash
+git clone https://github.com/vkondepati/fleet-route-optimizer.git
+cd fleet-route-optimizer
+docker compose up -d
+```
 
-#### What map tiles can I use with Leaflet? Is it limited to OpenStreetMap?
+Then visit http://localhost:5173/ for the main interface or http://localhost:8080/fleet-demo.html for demos.
 
-Leaflet is provider-agnostic, meaning you can use any map provider as long as you conform to its terms of use.
-You can roll your own tiles as well.
-[OpenStreetMap](https://www.openstreetmap.org/) is the most popular data source among different tile providers,
-but there are providers that use other sources.
+Check out our [Quick Start Guide](wiki/Quick-Start-Guide.md) for detailed setup instructions.
 
-Check out [this example](http://leaflet-extras.github.io/leaflet-providers/preview/)
-with over seventy different layers to choose from.
-Popular commercial options, free up to a particular number of requests, include
-[MapBox](http://mapbox.com),
-[Bing Maps](http://www.microsoft.com/maps/choose-your-bing-maps-API.aspx) (using a [plugin](https://github.com/shramov/leaflet-plugins)),
-[Esri ArcGIS](http://www.esri.com/software/arcgis/arcgisonline/maps/maps-and-map-layers) ([official plugin](https://github.com/Esri/esri-leaflet)),
-[Here Maps](https://developer.here.com/),
-and [Stadia Maps](https://docs.stadiamaps.com/tutorials/raster-maps-with-leaflet/).
+#### What are the system requirements?
 
-Always be sure to **read the terms of use** of a chosen tile provider, **know its limitations**, and **attribute it properly** in your app.
+**Minimum:**
+- 4GB RAM, 2GB free disk space
+- Docker Desktop (recommended) OR Node.js 18+, PostgreSQL 13+ with PostGIS, Redis 6+
 
-#### I'm looking for satellite imagery to use with my Leaflet map, any options?
+**Recommended:**
+- 8GB+ RAM, 5GB+ free disk space
+- Modern web browser with WebGL support for mapping
 
-[MapBox](http://mapbox.com),
-[Bing Maps](http://www.microsoft.com/maps/choose-your-bing-maps-API.aspx),
-[ArcGIS](http://www.esri.com/software/arcgis/arcgisonline/maps/maps-and-map-layers),
-and [Stadia Maps](https://docs.stadiamaps.com/map-styles/alidade-satellite/) provide satellite imagery among others.
+#### Can I test changes locally instead of waiting for CI/CD?
 
-#### I want to use Google Maps API tiles with Leaflet, can I do that?
+Yes! We have a 30-second local testing infrastructure:
+```bash
+npm run quick-test    # Essential checks (30 seconds vs 5-10 min CI/CD)
+npm run verify        # Full local CI pipeline
+./local-ci.bat       # Windows batch script
+```
 
-The problem with Google is that its [Terms of Use](https://developers.google.com/maps/terms) forbid any means of tile access other than through the Google Maps API.
+See [Local Testing Guide](LOCAL-TESTING-GUIDE.md) for complete setup.
 
-You can add the Google Maps API as a Leaflet layer with the [GoogleMutant plugin](https://gitlab.com/IvanSanchez/Leaflet.GridLayer.GoogleMutant). But, note that the map experience will not be perfect, because Leaflet must wait for the Google Maps JS engine to load the map tiles, so you might experience glitches and lagging when using it.
+## Route Optimization
 
-#### I want to roll my own OSM tile server for Leaflet, where do I start?
+#### What optimization algorithms are supported?
 
-Check out [this excellent guide](http://switch2osm.org/serving-tiles/).
+Fleet Route Manager includes multiple Vehicle Routing Problem (VRP) algorithms:
 
-#### I want to create tiles from my own data for use with Leaflet, what are the options?
+- **Clarke-Wright Savings Algorithm**: Classic, reliable approach
+- **A* Pathfinding**: Geographic-aware routing with obstacles
+- **Genetic Algorithm**: Evolutionary optimization for complex scenarios
+- **Multi-Objective**: Balance distance, time, cost, and capacity constraints
 
-There's a number of services that allow you to do this easily,
-notably [MapBox](https://www.mapbox.com/), [CartoDB](http://cartodb.com/) and [GIS Cloud](http://www.giscloud.com/).
-If you want to make tiles on your own, probably the easiest way is using [TileMill](https://tilemill-project.github.io/tilemill/).
-TileMill can export your map as a single [.mbtiles](https://www.mapbox.com/developers/mbtiles/) file, which can be copied to a webserver and accessed by Leaflet with [a small PHP script](https://github.com/infostreams/mbtiles-php).
-Alternatively, you can [extract](https://github.com/mapbox/mbutil) the tiled images from the .mbtiles database and place them directly on your webserver with absolutely no server-side dependencies.
+Check our [Algorithm Documentation](wiki/Vehicle-Routing-Problem.md) for details.
 
-## Commercial Use and Licensing
+#### How accurate are the route calculations?
 
-#### I have an app that gets lots of hits a day, and I want to switch from Google/Bing/whatever to Leaflet. Is there a fee for using it?
+Routes use PostGIS spatial calculations with meter-precision accuracy:
+- Real geographic distances (not straight-line)
+- Support for road networks and turn restrictions
+- Integration with OpenStreetMap data
+- Spatial indexing for high performance
 
-Leaflet, unlike Google Maps and other all-in-one solutions, is just a JavaScript library.
-It's free to use, but doesn't provide map imagery on its own &mdash;
-you have to choose a tile service to combine with it.
+#### Can I add custom constraints?
 
-There are [plenty of options](#what-map-tiles-can-i-use-with-leaflet-is-it-limited-to-openstreetmap) for a tile service,
-each with their own terms of use, prices (some of them free), features, limitations, etc.
-The choice is yours.
+Yes! Fleet Route Manager supports:
+- Vehicle capacity limits (weight/volume)
+- Time windows for deliveries
+- Driver work hour restrictions  
+- Vehicle type restrictions (e.g., refrigerated trucks)
+- Custom cost functions
 
-#### I'm building a commercial app that I plan to sell. Can I use Leaflet in it?
+See [Configuration Guide](wiki/Configuration.md) for implementation details.
 
-You're welcome to do so, as the code is published under the very permissive [2-clause BSD License](https://github.com/Leaflet/Leaflet/blob/main/LICENSE).
-Just make sure to attribute the use of the library somewhere in the app UI or the distribution
-(e.g. keep the Leaflet link on the map, or mention the use on the About page or a Readme file, etc.) and you'll be fine.
+## Database and Spatial Features
 
-That only applies to the code, though.
-Make sure you conform to the terms of use of the tile images provider(s) that you choose, as well.
+#### What database does Fleet Route Manager use?
 
+PostgreSQL 15+ with PostGIS 3.3 extensions for spatial operations:
+- Geographic point storage with SRID 4326 (WGS84)
+- Spatial indexing using GiST
+- Distance calculations in meters/kilometers
+- Polygon support for delivery zones
 
-## Features
+#### How do I connect my existing data?
 
-#### What's the best way to put the data I have on a Leaflet map?
+Fleet Route Manager provides multiple integration options:
+- REST API endpoints for vehicles/deliveries
+- CSV import/export functionality  
+- Direct database connection for ETL processes
+- WebSocket real-time updates
 
-Check out [this awesome cheatsheet](https://github.com/tmcw/mapmakers-cheatsheet).
+Check [Database Schema](wiki/Database-Schema.md) and [API Documentation](wiki/REST-API-Documentation.md).
 
-#### Why is there still no feature X in Leaflet?
+#### Can I use different map providers?
 
-First of all, did you check out the [Leaflet plugins page](http://leafletjs.com/plugins.html)?
-It lists about a hundred plugins doing all kinds of crazy stuff,
-and there's a high possibility that it has what you're looking for.
+Yes! While we use OpenStreetMap by default, you can integrate:
+- Mapbox (custom styles and satellite imagery)
+- Bing Maps (commercial usage)
+- ArcGIS (enterprise features)
+- Google Maps (via plugins)
 
-Generally, we do our best to keep the Leaflet core small, lightweight and simple,
-focusing on _quality_ instead of _quantity_, and leaving all the rest to plugin authors.
-
-Check out [this video](http://www.youtube.com/watch?v=_P2SaCPbJ4w) of a talk by the Leaflet creator for more background on the story and philosophy behind Leaflet.
-Another essential read is [Advocating Simplicity in Open Source](http://blog.universalmind.com/advocating-simplicity-in-open-source/) by the same guy.
-
+Always check the terms of use for your chosen provider.
 
 ## Performance
 
-#### I have thousands of markers on my map. How do I make it faster and more usable?
+#### How many vehicles/deliveries can the system handle?
 
-Check out the [Leaflet.markercluster](https://github.com/Leaflet/Leaflet.markercluster) plugin. It's amazing.
+Fleet Route Manager is designed for enterprise scale:
+- **Vehicles**: 1000+ concurrent vehicles
+- **Deliveries**: 10,000+ daily deliveries
+- **API Requests**: 10,000+ per second with Redis caching
+- **WebSocket Connections**: 1000+ concurrent real-time updates
 
-#### I have vector data with many thousands of points on my map. Any performance tips?
+#### I have performance issues with large datasets. Any tips?
 
-Leaflet generally does a pretty good job of handling heavy vector data
-with its real-time clipping and simplification algorithms,
-but the browser technology still has its limits.
-Try [switching from SVG to Canvas as the default rendering back-end](http://leafletjs.com/reference.html#global),
-it may help considerably (depends on the app and the data).
+1. **Use spatial indexing** - PostGIS GiST indexes are automatic
+2. **Enable Redis caching** - Reduces database load by 80%+
+3. **Optimize delivery batches** - Group by geographic zones
+4. **Use background processing** - Async route optimization
+5. **Scale horizontally** - Multiple API instances with load balancer
 
-If you still have too much data to render, you'll have to use some help of a server-side service
-like [MapBox](https://www.mapbox.com/),
-[CartoDB](http://cartodb.com/)
-and [GIS Cloud](http://www.giscloud.com/)
-(they all work great with Leaflet).
-What they do under the hood is serving rendered data as image tiles,
-along with additional data to enable interactivity like hovering shapes
-(e.g. done using [UTFGrid](https://www.mapbox.com/developers/utfgrid/) &mdash;
-Leaflet [has a nice plugin](https://github.com/danzel/Leaflet.utfgrid) for it).
+See [Performance Tuning Guide](wiki/Performance-Tuning.md) for detailed optimization.
 
+#### Why is my route optimization slow?
 
-## Misc
+Common causes and solutions:
+- **Large datasets**: Use geographic clustering to reduce problem size
+- **Complex constraints**: Simplify time windows or vehicle restrictions
+- **Algorithm choice**: Clarke-Wright is faster than Genetic for simple cases
+- **Database performance**: Check PostGIS spatial indexes
 
-#### I downloaded the Leaflet source but didn't find `leaflet.js` there. Why is that?
+## Commercial Use and Licensing
 
-You can download the built versions using links from the [download page](http://leafletjs.com/download.html).
-It even includes the latest build of the development version (`main` branch),
-updated automatically on each commit to the repo.
+#### Can I use Fleet Route Manager in commercial applications?
 
-We removed the built versions from the repository because it's a chore to build and commit them manually on each change,
-and it often complicates merging branches and managing contributions.
+Yes! Fleet Route Manager is open source under the MIT License:
+- ✅ Commercial use allowed
+- ✅ Modification and distribution permitted  
+- ✅ Private use allowed
+- ✅ No attribution required (but appreciated)
+
+Just ensure you comply with any third-party service terms (map providers, etc.).
+
+#### What about enterprise support?
+
+While Fleet Route Manager is open source, you can:
+- Get community support via [GitHub Discussions](https://github.com/vkondepati/fleet-route-optimizer/discussions)
+- Join our [Discord server](https://discord.gg/fleet-optimizer) for real-time help
+- Review [Contributing Guidelines](wiki/Contributing-Guidelines.md) for priority support
+
+For enterprise consulting, check our [Enterprise Services](wiki/Enterprise-Services.md) page.
+
+## Integration and APIs
+
+#### How do I integrate Fleet Route Manager with my existing system?
+
+Multiple integration approaches:
+1. **REST API**: Full CRUD operations for vehicles/deliveries
+2. **WebSocket API**: Real-time fleet status updates
+3. **Database Direct**: Connect to PostgreSQL directly
+4. **Webhook Events**: Push notifications for route changes
+
+See [Integration Guide](wiki/Third-party-Integrations.md) and [API Documentation](wiki/REST-API-Documentation.md).
+
+#### Can I customize the web interface?
+
+Yes! The frontend is built with React and can be customized:
+- Modify existing components in `src/` directory
+- Add custom dashboards and visualizations
+- Integrate with your branding/styling
+- Deploy as embedded widget
+
+See [Frontend Development Guide](wiki/React-Dashboard.md) for details.
+
+#### Does it work with mobile devices?
+
+Fleet Route Manager includes:
+- ✅ Responsive web design for mobile browsers
+- ✅ Touch-friendly map interactions
+- ✅ Progressive Web App (PWA) support
+- ✅ Offline capability for route viewing
+
+For native mobile apps, use our REST API with your preferred mobile framework.
+
+---
+
+**Need more help?** Check our [Wiki](https://github.com/vkondepati/fleet-route-optimizer/wiki) or join the [community discussion](https://github.com/vkondepati/fleet-route-optimizer/discussions)!

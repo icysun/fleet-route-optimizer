@@ -5,7 +5,8 @@ Welcome to the comprehensive Fleet Route Optimizer documentation wiki! This is y
 ## 🎯 Quick Navigation
 
 ### 🚀 Getting Started
-- **[Quick Start Guide](Quick-Start-Guide)** - Get running in 5 minutes
+- **[Quick Start Guide](Quick-Start-Guide)** - Get running in 5 minutes with Docker
+- **[Local Testing Guide](../LOCAL-TESTING-GUIDE.md)** - 30-second tests vs 5-10min CI/CD
 - **[Installation](Installation)** - Detailed setup instructions
 - **[Docker Deployment](Docker-Deployment)** - Complete containerized setup
 - **[Configuration](Configuration)** - Environment and system configuration
@@ -30,10 +31,10 @@ Welcome to the comprehensive Fleet Route Optimizer documentation wiki! This is y
 - **[Rate Limiting](Rate-Limiting)** - API usage limits and best practices
 
 ### 🎨 Frontend Development
-- **[React Dashboard](React-Dashboard)** - Building the management interface
-- **[Mapping Components](Mapping-Components)** - Interactive maps with Leaflet.js
-- **[Real-time Updates](Real-time-Updates)** - WebSocket integration
-- **[Mobile Responsive Design](Mobile-Responsive-Design)** - Cross-platform compatibility
+- **[React Dashboard](React-Dashboard)** - Building the fleet management interface
+- **[Fleet Mapping Components](Fleet-Mapping-Components)** - Interactive fleet tracking with real-time updates
+- **[Real-time Updates](Real-time-Updates)** - WebSocket integration for live fleet monitoring
+- **[Mobile Responsive Design](Mobile-Responsive-Design)** - Cross-platform fleet management access
 
 ### 🚀 Deployment & DevOps
 - **[Production Deployment](Production-Deployment)** - Enterprise deployment guide
@@ -43,6 +44,7 @@ Welcome to the comprehensive Fleet Route Optimizer documentation wiki! This is y
 - **[Performance Tuning](Performance-Tuning)** - Optimization for high-load scenarios
 
 ### 🔧 Development
+- **[Local Testing Infrastructure](../LOCAL-TESTING-GUIDE.md)** - Fast local CI/CD pipeline
 - **[Contributing Guidelines](Contributing-Guidelines)** - How to contribute code
 - **[Development Environment](Development-Environment)** - Local development setup
 - **[Testing Strategy](Testing-Strategy)** - Unit, integration, and E2E testing
@@ -132,7 +134,7 @@ Welcome to the comprehensive Fleet Route Optimizer documentation wiki! This is y
 - **[PostgreSQL Documentation](https://postgresql.org/docs/)** - Database fundamentals
 - **[PostGIS Reference](https://postgis.net/docs/)** - Spatial database extensions
 - **[Docker Documentation](https://docs.docker.com/)** - Containerization platform
-- **[Node.js Best Practices](https://github.com/goldbergyoni/nodebestpractices)** - Backend development
+- **[Fleet Route Manager API Reference](REST-API-Documentation)** - Complete API documentation for fleet management
 
 ### 📊 Academic & Research
 - **[Vehicle Routing Research](Vehicle-Routing-Research)** - Latest academic developments

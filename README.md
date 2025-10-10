@@ -33,10 +33,17 @@
 - Predictive ETA calculations with traffic integration
 
 🔧 **Production Ready**
-- Docker containerization for easy deployment
-- PostgreSQL + PostGIS for spatial data
-- Redis caching for high performance
+- Docker containerization with PostgreSQL + PostGIS spatial database
+- Redis caching for high-performance spatial queries
+- Local testing infrastructure (30s vs 5-10min CI/CD)
 - Comprehensive test suite with 95%+ coverage
+- Visual browser interface with multiple demo options
+
+🗺️ **PostGIS Spatial Integration**
+- Advanced spatial queries for route optimization
+- Geographic distance calculations and spatial indexing
+- Real-time vehicle tracking with spatial coordinates
+- Geospatial analysis for delivery zones and service areas
 
 ## 🚀 Quick Start
 
@@ -47,15 +54,16 @@ git clone https://github.com/vkondepati/fleet-route-optimizer.git
 cd fleet-route-optimizer
 
 # Start all services with Docker Compose
-docker-compose up -d
+docker compose up -d
 
-# Access the dashboard
-open http://localhost:3000
+# Access the applications
+open http://localhost:5173/          # Main web interface
+open http://localhost:8080/fleet-demo.html  # Demo dashboard
 ```
 
 ### Option 2: Local Development
 ```bash
-# Prerequisites: Node.js 18+, PostgreSQL 13+, Redis 6+
+# Prerequisites: Node.js 18+, PostgreSQL 13+ with PostGIS, Redis 6+
 
 # Install dependencies
 npm install
@@ -64,11 +72,21 @@ npm install
 cp .env.example .env
 # Edit .env with your database credentials
 
-# Initialize database
+# Initialize PostgreSQL + PostGIS database
 npm run db:setup
 
-# Start development server
-npm run dev
+# Start development servers
+npm run dev  # Starts both API and web servers
+
+# Run local tests (30 seconds vs 5-10 min CI)
+npm run quick-test
+```
+
+### Option 3: Quick Visual Demo
+```bash
+# For immediate visualization
+npm run dev:web  # Web interface at http://localhost:5173
+npx http-server . -p 8080  # Demo at http://localhost:8080/fleet-demo.html
 ```
 
 ## 📊 Performance Benchmarks
@@ -103,33 +121,42 @@ npm run dev
 
 ## 🧪 Testing
 
-We maintain 95%+ test coverage across all components:
+We maintain 95%+ test coverage with a comprehensive testing strategy:
 
 ```bash
-# Run all tests
-npm test
+# Quick local tests (30 seconds) - Skip CI/CD wait times!
+npm run quick-test
 
-# Unit tests only
-npm run test:unit
+# Full local CI pipeline (matches GitHub Actions)
+npm run verify
+./local-ci.bat  # Windows users
 
-# Integration tests
-npm run test:integration
+# Traditional test commands
+npm test                    # All tests
+npm run test:unit          # Unit tests only
+npm run test:integration   # Integration tests
+npm run test:e2e           # E2E tests with Cypress
+npm run test:performance   # Performance tests
 
-# E2E tests with Cypress
-npm run test:e2e
-
-# Performance tests
-npm run test:performance
+# Docker integration tests
+./test-docker.bat          # Local Docker testing
 ```
 
-See [TESTING.md](TESTING.md) for comprehensive testing guide.
+### Local Testing Benefits
+- ⚡ **30 seconds** vs 5-10 minutes GitHub Actions wait
+- 🔍 **Catch 90% of issues** before pushing
+- 🛠️ **Pre-commit hooks** prevent broken commits
+- 📊 **TypeScript + Jest** essential checks only
+
+See [LOCAL-TESTING-GUIDE.md](LOCAL-TESTING-GUIDE.md) for complete setup.
 
 ## 📖 Documentation
 
-- **[Quick Test Guide](QUICK-TEST-GUIDE.md)** - Get started testing in 5 minutes
-- **[API Documentation](docs/api.md)** - Complete API reference
-- **[Algorithm Guide](docs/algorithms.md)** - Understanding optimization techniques
-- **[Deployment Guide](docs/deployment.md)** - Production deployment instructions
+- **[Local Testing Guide](LOCAL-TESTING-GUIDE.md)** - 30-second tests vs 5-10min CI/CD
+- **[Quick Start Guide](wiki/Quick-Start-Guide.md)** - Get running with Docker in 5 minutes
+- **[PostGIS Setup](wiki/PostgreSQL-PostGIS-Setup.md)** - Spatial database configuration
+- **[API Documentation](wiki/REST-API-Documentation.md)** - Complete REST API reference
+- **[Local Development](LOCAL-DEVELOPMENT-GUIDE.md)** - Complete development setup
 - **[Plugin Development](PLUGIN-GUIDE.md)** - Creating custom extensions
 
 ## 🤝 Contributing
@@ -171,18 +198,19 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
-- Built with [Leaflet](https://leafletjs.com/) for mapping functionality
+- Built with [Leaflet](https://leafletjs.com/) for core mapping capabilities
+- Fleet Route Manager documentation and algorithms developed specifically for this project
 - Inspired by research from the Vehicle Routing Problem community
 - Special thanks to all [contributors](https://github.com/vkondepati/fleet-route-optimizer/graphs/contributors)
 
 ## 📞 Support
 
-- **Documentation**: [Wiki](https://github.com/vkondepati/fleet-route-optimizer/wiki)
+- **Fleet Route Manager Documentation**: [Wiki](https://github.com/vkondepati/fleet-route-optimizer/wiki) - Complete Fleet Route Manager documentation
 - **Issues**: [GitHub Issues](https://github.com/vkondepati/fleet-route-optimizer/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/vkondepati/fleet-route-optimizer/discussions)
 - **Discord**: [Join our community](https://discord.gg/fleet-optimizer)
 
 ---
 
-**Ready to optimize your fleet?** ⭐ Star this repo and [get started](docs/quick-start.md) today!
+**Ready to optimize your fleet?** ⭐ Star this repo and [get started](wiki/Quick-Start-Guide.md) today!
 

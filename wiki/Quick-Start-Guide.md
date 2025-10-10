@@ -36,20 +36,30 @@ cd fleet-route-optimizer
 
 ### Step 2: Start All Services
 ```bash
-# Start the complete stack
-docker-compose up -d
+# Start the complete stack with Docker Compose V2
+docker compose up -d
 
 # This will start:
-# - PostgreSQL 15 + PostGIS 3.3
-# - Redis 7 for caching
-# - Node.js API server
-# - Sample data initialization
+# - PostgreSQL 15 + PostGIS 3.3 for spatial data
+# - Redis 7 for high-performance caching
+# - Complete database initialization with sample data
+```
+
+### Alternative: Local Development
+```bash
+# For development with live reload
+npm install
+npm run dev:web  # Web interface at http://localhost:5173
+npm run dev:api  # API server at http://localhost:3001
+
+# Serve demo files
+npx http-server . -p 8080  # Demo at http://localhost:8080
 ```
 
 ### Step 3: Verify Everything is Running
 ```bash
 # Check service status
-docker-compose ps
+docker compose ps
 
 # Expected output:
 # ✅ fleet-optimizer-db     (PostgreSQL + PostGIS) - Healthy
@@ -57,12 +67,24 @@ docker-compose ps
 # ✅ fleet-optimizer-api    (API Server)           - Healthy
 ```
 
-### Step 4: Access Your Application
+### Step 4: Access Your Applications
 Open your browser and navigate to:
 
-- **🌐 Main Application**: http://localhost:3001
-- **🏥 Health Check**: http://localhost:3001/health
-- **📚 API Documentation**: http://localhost:3001/docs
+- **🌐 Main Web Interface**: http://localhost:5173/
+- **🎮 Fleet Demo Dashboard**: http://localhost:8080/fleet-demo.html
+- **🗺️ Real Fleet Optimizer**: http://localhost:8080/real-fleet-optimizer.html
+- **� PostGIS Integration Demo**: http://localhost:8080/fleet-optimizer-postgres.html
+- **🏥 API Health Check**: http://localhost:3001/health
+
+### Local Testing (NEW!)
+```bash
+# Quick 30-second tests (instead of waiting 5-10min for CI)
+npm run quick-test
+
+# Full local CI pipeline
+./local-ci.bat  # Windows
+npm run verify  # Cross-platform
+```
 
 ## 🎮 First Steps
 

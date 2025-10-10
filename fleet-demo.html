@@ -1,4 +1,7 @@
-<!DOCTYPE html>
+<!DOCTY    <!-- Leaflet CSS for Fleet Route Manager mapping interface -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+          integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+          crossorigin="" />tml>
 <html lang="en">
 <head>
     <meta charset="utf-8">
@@ -89,8 +92,8 @@
 
     <div class="container">
         <div class="info-panel">
-            <h3>📍 Interactive Map Dashboard</h3>
-            <p>Welcome to the Fleet Route Optimizer demo! This map shows the core mapping functionality powered by Leaflet.js. Click on markers to interact with them and explore the route optimization features.</p>
+            <h3>📍 Interactive Fleet Management Dashboard</h3>
+            <p>Welcome to the Fleet Route Optimizer demo! This interactive map demonstrates real-time fleet management capabilities including vehicle tracking, route optimization, and delivery coordination. The system uses PostgreSQL with PostGIS for spatial calculations and provides enterprise-grade fleet management features.</p>
         </div>
 
         <div id="map"></div>
@@ -122,13 +125,13 @@
         </div>
     </div>
 
-    <!-- Leaflet JavaScript from CDN -->
+    <!-- Leaflet JavaScript for Fleet Route Manager mapping engine -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
             integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
             crossorigin=""></script>
     
     <script>
-        // Check if Leaflet loaded properly
+        // Check if Leaflet loaded properly for Fleet Route Manager
         if (typeof L === 'undefined') {
             document.getElementById('map').innerHTML = '<div style="padding: 50px; text-align: center; color: red; font-size: 18px;">❌ Map library failed to load. Please check your internet connection and refresh the page.</div>';
         } else {

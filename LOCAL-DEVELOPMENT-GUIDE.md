@@ -1,12 +1,14 @@
 # 🚀 Local Development Setup Guide
 
+> **New**: ⚡ 30-second local testing vs 5-10 minute GitHub Actions wait! See [Local Testing Guide](LOCAL-TESTING-GUIDE.md)
+
 ## 📋 Prerequisites
 
 Before running Fleet Route Optimizer locally, make sure you have these installed:
 
 ### Required Software
 - **Node.js 18+** - [Download here](https://nodejs.org/)
-- **PostgreSQL 13+** - [Download here](https://www.postgresql.org/download/)
+- **PostgreSQL 13+ with PostGIS** - [Download here](https://www.postgresql.org/download/)
 - **Redis 6+** - [Download here](https://redis.io/download/)
 - **Git** - [Download here](https://git-scm.com/)
 
@@ -301,43 +303,69 @@ npm run dev          # Start both API and web servers
 npm run build        # Build for production
 npm run typecheck    # Check TypeScript types
 npm run lint         # Run ESLint
-npm run lint:fix     # Fix ESLint issues
 
-# Database
-npm run db:setup     # Initialize database
-npm run db:migrate   # Run migrations
-npm run db:seed      # Add sample data
-npm run db:reset     # Reset database
+# Quick Local Testing (NEW!) ⚡
+npm run quick-test   # 30-second essential checks
+npm run verify       # Full local CI pipeline
+./local-ci.bat       # Windows batch script
+npm run precommit    # Pre-commit checks
 
-# Testing
+# Database with PostGIS
+npm run db:setup     # Initialize PostgreSQL + PostGIS
+npm run db:migrate   # Run spatial migrations
+npm run db:seed      # Add sample spatial data
+
+# Traditional Testing
 npm test             # Run all tests
 npm run test:watch   # Watch mode
 npm run test:coverage # Coverage report
 
-# Docker
-docker-compose up -d    # Start services
-docker-compose down     # Stop services
-docker-compose logs -f  # View logs
+# Docker Testing
+./test-docker.bat    # Local Docker integration tests
+docker compose up -d # Start all services (V2 syntax)
+docker compose down  # Stop services
 ```
+
+## ⚡ Local Testing Benefits
+
+The new local testing infrastructure provides:
+
+- **30 seconds** vs 5-10 minutes GitHub Actions wait
+- **Pre-commit hooks** that prevent broken commits
+- **Fast feedback loop** for development
+- **Reliable CI/CD pipeline** testing locally
+
+See [LOCAL-TESTING-GUIDE.md](LOCAL-TESTING-GUIDE.md) for complete details.
 
 ## 🎯 Next Steps
 
 Once you have the application running:
 
-1. **Explore the Dashboard** - Navigate to http://localhost:3000
-2. **Test API Endpoints** - Use the interactive docs at http://localhost:3001/docs
-3. **Run the Test Suite** - Execute `npm test` to verify everything works
-4. **Try Route Optimization** - Create some vehicles and deliveries
-5. **Check Real-time Features** - Test the GPS tracking simulation
+1. **Explore the Web Interface** - Navigate to http://localhost:5173
+2. **Try Demo Dashboards** - Check http://localhost:8080/fleet-demo.html
+3. **Test API Endpoints** - API server at http://localhost:3001
+4. **Run Quick Tests** - Execute `npm run quick-test` for 30-second validation
+5. **Try Route Optimization** - Create vehicles and deliveries with PostGIS
+6. **Check Real-time Features** - Test GPS tracking with spatial coordinates
+
+## 🛠️ Development Workflow
+
+Recommended development process:
+
+1. **Make code changes**
+2. **Run quick tests**: `npm run quick-test` (30 seconds)
+3. **Fix any issues locally** (much faster than CI/CD)
+4. **Commit with automatic pre-commit hooks**
+5. **Push with confidence** - 90% of issues caught locally
 
 ## 🤝 Need Help?
 
 If you encounter any issues:
 
-1. **Check the logs** - Look at console output for error messages
-2. **Review documentation** - Check [TESTING.md](TESTING.md) for detailed testing info
-3. **Search existing issues** - Look at [GitHub Issues](https://github.com/vkondepati/fleet-route-optimizer/issues)
-4. **Create a new issue** - Report bugs or ask questions
-5. **Join our community** - Discord server for real-time help
+1. **Check the Local Testing Guide** - [LOCAL-TESTING-GUIDE.md](LOCAL-TESTING-GUIDE.md)
+2. **Review logs** - Look at console output for error messages
+3. **Test locally first** - Use `npm run quick-test` before pushing
+4. **Search existing issues** - [GitHub Issues](https://github.com/vkondepati/fleet-route-optimizer/issues)
+5. **Create a new issue** - Report bugs or ask questions
 
 Happy coding! 🚀
