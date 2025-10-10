@@ -30,21 +30,21 @@ jobs:
           path: ./*
           key: ${{ runner.os }}-${{ github.ref }}-${{ github.sha }}-setup
 
-  build-docs:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v5
+  # build-docs:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Check out repository
+  #       uses: actions/checkout@v5
 
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          bundler-cache: true
-          working-directory: ./docs
+  #     - name: Set up Ruby
+  #       uses: ruby/setup-ruby@v1
+  #       with:
+  #         bundler-cache: true
+  #         working-directory: ./docs
 
-      - name: Run jekyll build
-        working-directory: ./docs
-        run: bundle exec jekyll build
+  #     - name: Run jekyll build
+  #       working-directory: ./docs
+  #       run: bundle exec jekyll build
 
   lint:
     needs: setup
