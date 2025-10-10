@@ -109,6 +109,19 @@ FROM vehicles v
 LEFT JOIN deliveries d ON v.id = d.assigned_vehicle_id AND d.status = 'assigned'
 GROUP BY v.id, v.name, v.type, v.capacity_kg, v.status, v.driver_name, v.current_location;
 
--- Grant permissions
-GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
-GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
+-- Grant permissions (works for both postgres and test_user)
+DO $$
+BEGIN
+    -- Grant to postgres user if it exists (production environment)
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'postgres') THEN
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO postgres;
+        GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO postgres;
+    END IF;
+    
+    -- Grant to test_user if it exists (test environment)
+    IF EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'test_user') THEN
+        GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO test_user;
+        GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO test_user;
+    END IF;
+END
+$$;
