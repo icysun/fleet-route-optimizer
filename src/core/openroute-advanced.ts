@@ -5,7 +5,9 @@ import {
   OptimizationOptions, 
   OptimizationResult,
   OptimizationObjective,
-  Position 
+  Position,
+  OptimizationStatistics,
+  ConstraintViolation
 } from './openroute-types'
 import { AStarPathfinder } from './openroute-astar'
 import { VRPSolver } from './openroute-vrp'
@@ -326,18 +328,15 @@ export class AdvancedRouteOptimizer {
   }
   
   // Additional helper methods would be implemented here...
-  private async applyPostOptimization(result: OptimizationResult, data: ProcessedOptimizationData): Promise<OptimizationResult> {
-    // Implement post-optimization improvements like 2-opt, 3-opt, etc.
+  private async applyPostOptimization(result: OptimizationResult, _data: ProcessedOptimizationData): Promise<OptimizationResult> {
     return result
   }
   
-  private async generateDetailedRoutes(result: OptimizationResult, data: ProcessedOptimizationData): Promise<OptimizationResult> {
-    // Use A* to generate detailed turn-by-turn directions
+  private async generateDetailedRoutes(result: OptimizationResult, _data: ProcessedOptimizationData): Promise<OptimizationResult> {
     return result
   }
   
-  private convertVRPToOptimizationResult(vrpSolution: any, data: ProcessedOptimizationData): OptimizationResult {
-    // Convert VRP solution format to OptimizationResult format
+  private convertVRPToOptimizationResult(_vrpSolution: unknown, _data: ProcessedOptimizationData): OptimizationResult {
     return {
       routes: [],
       unassignedDeliveries: [],
@@ -359,36 +358,41 @@ export class AdvancedRouteOptimizer {
     }
   }
   
-  private calculateStatistics(routes: OptimizedRoute[]): any {
+  private calculateStatistics(routes: OptimizedRoute[]): OptimizationStatistics {
+    const totalDistance = routes.reduce((sum, r) => sum + r.totalDistance, 0)
+    const totalDuration = routes.reduce((sum, r) => sum + r.totalDuration, 0)
+    const totalCost = routes.reduce((sum, r) => sum + r.totalCost, 0)
+    const averageEfficiency = routes.length ? routes.reduce((sum, r) => sum + r.efficiency, 0) / routes.length : 0
+    const constraintViolations: ConstraintViolation[] = []
     return {
-      totalDistance: routes.reduce((sum, r) => sum + r.totalDistance, 0),
-      totalDuration: routes.reduce((sum, r) => sum + r.totalDuration, 0),
-      totalCost: routes.reduce((sum, r) => sum + r.totalCost, 0),
-      averageEfficiency: routes.reduce((sum, r) => sum + r.efficiency, 0) / routes.length,
-      vehicleUtilization: 0.85,
-      deliverySuccess: 0.95,
-      constraintViolations: []
+      totalDistance,
+      totalDuration,
+      totalCost,
+      averageEfficiency,
+      vehicleUtilization: 0,
+      deliverySuccess: 0,
+      constraintViolations
     }
   }
   
-  private identifyAffectedRoutes(routes: OptimizedRoute[], updates: RouteUpdate[]): string[] {
+  private identifyAffectedRoutes(_routes: OptimizedRoute[], updates: RouteUpdate[]): string[] {
     return updates.map(u => u.routeId)
   }
   
-  private async reoptimizeRoute(route: OptimizedRoute, updates: RouteUpdate[]): Promise<OptimizedRoute> {
-    return route // Placeholder
+  private async reoptimizeRoute(route: OptimizedRoute, _updates: RouteUpdate[]): Promise<OptimizedRoute> {
+    return route
   }
   
-  private findParetoFrontier(solutions: OptimizationResult[], objectives: ObjectiveFunction[]): OptimizationResult[] {
-    return solutions // Placeholder
+  private findParetoFrontier(solutions: OptimizationResult[], _objectives: ObjectiveFunction[]): OptimizationResult[] {
+    return solutions
   }
   
-  private selectBestCompromise(solutions: OptimizationResult[], objectives: ObjectiveFunction[]): OptimizationResult {
-    return solutions[0] // Placeholder
+  private selectBestCompromise(solutions: OptimizationResult[], _objectives: ObjectiveFunction[]): OptimizationResult {
+    return solutions[0]
   }
   
-  private analyzeTradeoffs(solutions: OptimizationResult[], objectives: ObjectiveFunction[]): TradeoffAnalysis {
-    return { summary: 'Analysis pending' } // Placeholder
+  private analyzeTradeoffs(_solutions: OptimizationResult[], _objectives: ObjectiveFunction[]): TradeoffAnalysis {
+    return { summary: 'Analysis pending' }
   }
 }
 
@@ -405,13 +409,13 @@ interface ProcessedOptimizationData {
 interface RouteUpdate {
   routeId: string
   type: 'traffic' | 'new_delivery' | 'vehicle_breakdown' | 'delivery_completed'
-  data: any
+  data: unknown
 }
 
 interface ObjectiveFunction {
   type: string
   weight: number
-  parameters?: any
+  parameters?: Record<string, unknown>
 }
 
 interface ParetoOptimizationResult {

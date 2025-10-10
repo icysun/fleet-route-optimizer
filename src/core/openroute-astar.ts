@@ -1,4 +1,4 @@
-import { Position, Vehicle, Delivery, RouteSegment } from './openroute-types'
+import { Position, Vehicle, RouteSegment } from './openroute-types'
 
 /**
  * A* pathfinding algorithm implementation for road networks
@@ -113,7 +113,7 @@ export class AStarPathfinder {
     }
   }
   
-  private reconstructPath(goalNode: AStarNode, goalPosition: Position): RouteSegment[] {
+  private reconstructPath(goalNode: AStarNode, _goalPosition: Position): RouteSegment[] {
     const path: RouteSegment[] = []
     let current: AStarNode | null = goalNode
     

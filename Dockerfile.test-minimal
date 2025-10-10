@@ -1,0 +1,22 @@
+# Simplified test runner without heavy dependencies
+FROM node:20-alpine
+WORKDIR /app
+
+# Install build tools
+RUN apk add --no-cache git python3 make g++
+
+# Copy package files and install minimal deps
+COPY package.json ./
+ENV CYPRESS_INSTALL_BINARY=0
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+
+# Install only what we need for testing
+RUN npm install --no-optional typescript jest ts-jest @types/jest @types/node eslint @typescript-eslint/parser @typescript-eslint/eslint-plugin
+
+# Copy source and config
+COPY tsconfig.json ./
+COPY .eslintrc.js ./
+COPY jest.config.js ./
+COPY src ./src
+
+CMD ["npm", "test"]

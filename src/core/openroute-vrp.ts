@@ -1,11 +1,10 @@
 import { 
   Vehicle, 
-  Delivery, 
+  Delivery,
   VRPInstance, 
   VRPSolution, 
   VRPRoute, 
   Position,
-  OptimizationResult,
   ConstraintViolation 
 } from './openroute-types'
 

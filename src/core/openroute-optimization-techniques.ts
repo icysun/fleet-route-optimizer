@@ -214,8 +214,8 @@ export class OptimizationTechniques {
     
     for (let iter = 0; iter < iterations; iter++) {
       // Select operators based on weights
-      const destroyOp = this.selectOperator(destroyOperators, destroyWeights)
-      const repairOp = this.selectOperator(repairOperators, repairWeights)
+  const destroyOp = this.selectOperator(destroyOperators, destroyWeights)
+  const repairOp = this.selectOperator(repairOperators, repairWeights)
       
       // Apply destroy and repair
       const destroyedSolution = destroyOp(currentSolution, 0.1) // Remove 10% of deliveries
@@ -430,22 +430,22 @@ export class OptimizationTechniques {
     }
   }
   
-  private randomDestroy(solution: OptimizationResult, percentage: number): OptimizationResult {
+  private randomDestroy(solution: OptimizationResult, _percentage: number): OptimizationResult {
     // Remove random deliveries
     return solution
   }
   
-  private worstDestroy(solution: OptimizationResult, percentage: number): OptimizationResult {
+  private worstDestroy(solution: OptimizationResult, _percentage: number): OptimizationResult {
     // Remove deliveries with highest cost
     return solution
   }
   
-  private shawDestroy(solution: OptimizationResult, percentage: number): OptimizationResult {
+  private shawDestroy(solution: OptimizationResult, _percentage: number): OptimizationResult {
     // Remove similar deliveries
     return solution
   }
   
-  private routeDestroy(solution: OptimizationResult, percentage: number): OptimizationResult {
+  private routeDestroy(solution: OptimizationResult, _percentage: number): OptimizationResult {
     // Remove entire routes
     return solution
   }
@@ -484,13 +484,13 @@ export class OptimizationTechniques {
     return solution.statistics.totalDistance
   }
   
-  private updateOperatorWeights(destroyWeights: number[], repairWeights: number[], improvement: number): void {
+  private updateOperatorWeights(_destroyWeights: number[], _repairWeights: number[], improvement: number): void {
     // Update weights based on performance
     const factor = improvement > 0 ? 1.1 : 0.9
     // Simplified weight update
   }
   
-  private extractFeatures(deliveries: Delivery[], depot: Position, historical: HistoricalRoute[]): MLFeatures {
+  private extractFeatures(deliveries: Delivery[], _depot: Position, _historical: HistoricalRoute[]): MLFeatures {
     return {
       deliveryCount: deliveries.length,
       averageDistance: 0,
@@ -499,12 +499,12 @@ export class OptimizationTechniques {
     }
   }
   
-  private predictInitialSolution(features: MLFeatures): OptimizationResult {
+  private predictInitialSolution(_features: MLFeatures): OptimizationResult {
     // ML prediction logic
     return this.generateInitialSolution([], [], [0, 0])
   }
   
-  private positionsToSegments(positions: Position[]): any[] {
+  private positionsToSegments(positions: Position[]): RouteSegmentLike[] {
     return positions.map((pos, i) => ({
       start: pos,
       end: positions[i + 1] || pos,
@@ -528,4 +528,13 @@ interface MLFeatures {
   averageDistance: number
   densityMetric: number
   timeWindowComplexity: number
+}
+
+// Local lightweight segment representation used by positionsToSegments
+interface RouteSegmentLike {
+  start: Position
+  end: Position
+  distance: number
+  duration: number
+  instruction: string
 }

@@ -17,7 +17,11 @@ export class FleetManager {
   private tracker: RealTimeTracker
   private vehicles: Map<string, Vehicle> = new Map()
   private activeRoutes: Map<string, OptimizedRoute> = new Map()
-  private routeOptimizer: any // Will be the AdvancedRouteOptimizer
+  // Placeholder for an injected optimizer implementation; kept optional until wiring is added
+  // Define a minimal interface to avoid use of 'any'
+  private routeOptimizer?: {
+    reoptimizeRoute: (vehicleId: string, currentPosition: Position, deliveries: Delivery[]) => Promise<any[] | null>
+  }
   
   // Event callbacks
   private onFleetUpdate?: (fleet: FleetStatus) => void
@@ -480,7 +484,15 @@ export class FleetManager {
     deliveries: Delivery[]
   ): Promise<any[] | null> {
     // Use route optimizer to recalculate remaining route
-    return null // Placeholder
+    if (this.routeOptimizer) {
+      try {
+        return await this.routeOptimizer.reoptimizeRoute(vehicleId, currentPosition, deliveries)
+      } catch (err) {
+        console.warn('Reoptimization failed', err)
+        return null
+      }
+    }
+    return null // No optimizer wired yet
   }
   
   private calculateRouteDistance(segments: any[]): number {

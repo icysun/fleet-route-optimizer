@@ -56,15 +56,15 @@ const vrpSolver = new VRPSolver()
 const roadNetwork = {
   nodes: new Map(),
   edges: new Map(),
-  getNeighbors: (nodeId: string) => [],
-  getDistance: (from: string, to: string) => 0,
-  addNode: (id: string, position: Position) => {},
-  addEdge: (from: string, to: string, weight: number) => {}
+  getNeighbors: (_nodeId: string) => [],
+  getDistance: (_from: string, _to: string) => 0,
+  addNode: (_id: string, _position: Position) => {},
+  addEdge: (_from: string, _to: string, _weight: number) => {}
 }
 
-const routeOptimizer = new AdvancedRouteOptimizer(roadNetwork)
-const pathfinder = new AStarPathfinder(roadNetwork)
-const fleetManager = new FleetManager(`ws://localhost:${wsPort}`)
+const _routeOptimizer = new AdvancedRouteOptimizer(roadNetwork)
+const _pathfinder = new AStarPathfinder(roadNetwork)
+const _fleetManager = new FleetManager(`ws://localhost:${wsPort}`)
 
 /**
  * Health check endpoint
@@ -72,7 +72,7 @@ const fleetManager = new FleetManager(`ws://localhost:${wsPort}`)
 app.get('/health', async (req: Request, res: Response) => {
   try {
     // Check database connection
-    const dbResult = await pool.query('SELECT NOW()')
+    const _dbResult = await pool.query('SELECT NOW()')
     
     // Check PostGIS extension
     const postGISResult = await pool.query('SELECT PostGIS_Version()')
@@ -123,7 +123,7 @@ app.get('/api/vehicles', async (req: Request, res: Response) => {
       ORDER BY created_at DESC
     `)
     
-    const vehicles = result.rows.map(row => ({
+    const vehicles = result.rows.map((row: any) => ({
       id: row.id.toString(),
       name: row.name,
       vehicleType: row.vehicle_type,
@@ -218,7 +218,7 @@ app.get('/api/deliveries', async (req: Request, res: Response) => {
       ORDER BY priority DESC, created_at DESC
     `)
     
-    const deliveries = result.rows.map(row => ({
+    const deliveries = result.rows.map((row: any) => ({
       id: row.id.toString(),
       pickupLocation: row.pickup_lat && row.pickup_lng ? [row.pickup_lat, row.pickup_lng] : null,
       position: row.delivery_lat && row.delivery_lng ? [row.delivery_lat, row.delivery_lng] : null,
@@ -326,7 +326,7 @@ app.post('/api/optimize', async (req: Request, res: Response) => {
       WHERE status = 'pending'
     `)
     
-    const vehicles: Vehicle[] = vehiclesResult.rows.map(row => ({
+    const vehicles: Vehicle[] = vehiclesResult.rows.map((row: any) => ({
       id: row.id.toString(),
       name: row.name,
       position: [row.lat, row.lng],
@@ -335,10 +335,10 @@ app.post('/api/optimize', async (req: Request, res: Response) => {
       maxRange: 500,
       fuelLevel: 85,
       status: 'active',
-      vehicleType: row.type as any
+      vehicleType: row.type as 'truck' | 'van' | 'car' | 'motorcycle'
     }))
     
-    const deliveries: Delivery[] = deliveriesResult.rows.map(row => ({
+    const deliveries: Delivery[] = deliveriesResult.rows.map((row: any) => ({
       id: row.id.toString(),
       address: `Delivery ${row.id}`,
       position: [row.delivery_lat, row.delivery_lng],
@@ -462,7 +462,7 @@ async function optimizeWithPostGIS(instance: VRPInstance, algorithm: string) {
     // Calculate total distance using PostGIS results
     const totalDistance = routeDeliveries.reduce((sum, delivery, idx) => {
       if (idx === 0) return 0
-      const distanceRow = distanceMatrix.rows.find(row => 
+      const distanceRow = distanceMatrix.rows.find((row: any) => 
         row.from_id === routeDeliveries[idx-1].id && row.to_id === delivery.id
       )
       return sum + (distanceRow ? distanceRow.distance_meters / 1000 : 0) // Convert to km
@@ -593,7 +593,7 @@ const server = createServer(app)
 // Create WebSocket server for real-time updates
 const wss = new WebSocketServer({ port: Number(wsPort) })
 
-wss.on('connection', (ws) => {
+wss.on('connection', (ws: any) => {
   console.log('🔌 WebSocket client connected')
   
   // Send initial fleet status from database

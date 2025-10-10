@@ -73,7 +73,7 @@ services:
       retries: 3
 
   web:
-    image: node:18-alpine
+    image: node:20-alpine
     container_name: fleet-optimizer-web
     working_dir: /app
     environment:
@@ -89,6 +89,44 @@ services:
     networks:
       - fleet-network
     command: sh -c "npm install && npm run dev:web"
+
+  # Test Runner (isolated) - builds image and runs jest once
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-minimal
+    container_name: fleet-optimizer-tests
+    environment:
+      - NODE_ENV=test
+    networks:
+      - fleet-network
+    command: ["npm", "test", "--", "--runInBand"]
+
+  # Type checking (runs tsc --noEmit inside container)
+  typecheck:
+    image: node:20-alpine
+    working_dir: /app
+    container_name: fleet-optimizer-typecheck
+    volumes:
+      - .:/app
+    environment:
+      - CYPRESS_INSTALL_BINARY=0
+    command: sh -c "npm install && npm run typecheck"
+    networks:
+      - fleet-network
+
+  # Lint (runs eslint with auto-fix)
+  lint:
+    image: node:20-alpine
+    working_dir: /app
+    container_name: fleet-optimizer-lint
+    volumes:
+      - .:/app
+    environment:
+      - CYPRESS_INSTALL_BINARY=0
+    command: sh -c "npm install && npm run lint"
+    networks:
+      - fleet-network
 
 volumes:
   postgres_data:

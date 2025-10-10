@@ -18,5 +18,14 @@ module.exports = {
   moduleNameMapping: {
     '^@/(.*)$': '<rootDir>/src/$1'
   },
-  testTimeout: 10000
+  testTimeout: 10000,
+  globals: {
+    'ts-jest': {
+      tsconfig: 'tsconfig.json'
+    }
+  },
+  // Add more verbose output for debugging
+  verbose: true,
+  // Run tests sequentially to avoid conflicts
+  maxWorkers: 1
 };

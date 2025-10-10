@@ -1,0 +1,17 @@
+############################################################
+# Fleet Route Optimizer - Test Runner Image
+############################################################
+FROM node:20-alpine AS test
+WORKDIR /app
+RUN apk add --no-cache git
+COPY package*.json ./
+ENV CYPRESS_INSTALL_BINARY=0
+RUN npm install
+COPY tsconfig.* ./
+COPY jest.config.js ./
+COPY .eslintrc.js ./
+COPY src ./src
+# Copy tests directory if present
+COPY tests ./tests
+# Execute tests (can be overridden at runtime)
+CMD ["npm", "test"]

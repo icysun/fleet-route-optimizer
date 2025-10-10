@@ -2,7 +2,6 @@ import {
   GPSUpdate, 
   TrafficUpdate, 
   RouteDeviation, 
-  Vehicle, 
   OptimizedRoute,
   Position 
 } from './openroute-types'
@@ -133,7 +132,7 @@ export class RealTimeTracker {
   /**
    * Update vehicle position manually (for testing or backup)
    */
-  updateVehiclePosition(vehicleId: string, position: Position, metadata?: any): void {
+  updateVehiclePosition(vehicleId: string, position: Position, metadata?: { speed?: number; heading?: number; accuracy?: number }): void {
     const update: GPSUpdate = {
       vehicleId,
       position,
@@ -323,7 +322,7 @@ export class RealTimeTracker {
     this.onConnectionStatus?.('error')
   }
   
-  private sendMessage(message: any): void {
+  private sendMessage(message: Record<string, unknown>): void {
     if (this.websocket && this.websocket.readyState === WebSocket.OPEN) {
       this.websocket.send(JSON.stringify(message))
     } else {
