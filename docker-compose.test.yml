@@ -3,25 +3,25 @@ version: "3.8"
 services:
   # Test Database
   postgres-test:
-    image: postgres:14-alpine
+    image: postgis/postgis:15-3.3
     environment:
-      POSTGRES_DB: openroute_test
+      POSTGRES_DB: fleet_optimizer_test
       POSTGRES_USER: test_user
       POSTGRES_PASSWORD: test_password
     ports:
       - "5433:5432"
     volumes:
       - postgres_test_data:/var/lib/postgresql/data
-      - ./test-scripts/init-test-db.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init.sql
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U test_user -d openroute_test"]
+      test: ["CMD-SHELL", "pg_isready -U test_user -d fleet_optimizer_test"]
       interval: 10s
       timeout: 5s
       retries: 5
 
   # Test Redis
   redis-test:
-    image: redis:6-alpine
+    image: redis:7-alpine
     ports:
       - "6380:6379"
     command: redis-server --appendonly yes
@@ -33,87 +33,74 @@ services:
       timeout: 3s
       retries: 5
 
-  # Test WebSocket Server
-  websocket-test:
-    build:
-      context: .
-      dockerfile: test-dockerfiles/Dockerfile.websocket-test
-    ports:
-      - "8082:8081"
-    environment:
-      - NODE_ENV=test
-      - WS_PORT=8081
-    depends_on:
-      - redis-test
-    volumes:
-      - ./test-scripts:/app/test-scripts
-
   # Test API Server
   api-test:
     build:
       context: .
-      dockerfile: test-dockerfiles/Dockerfile.api-test
+      dockerfile: Dockerfile.api
     ports:
-      - "8001:8000"
+      - "3003:3001"
+      - "3004:3002"
     environment:
       - NODE_ENV=test
-      - DATABASE_URL=postgres://test_user:test_password@postgres-test:5432/openroute_test
-      - REDIS_URL=redis://redis-test:6379
-      - JWT_SECRET=test-secret-key
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=fleet_optimizer_test
+      - DB_USER=test_user
+      - DB_PASSWORD=test_password
+      - REDIS_HOST=redis-test
+      - REDIS_PORT=6379
+      - API_PORT=3001
+      - WS_PORT=3002
     depends_on:
       postgres-test:
         condition: service_healthy
       redis-test:
         condition: service_healthy
     volumes:
-      - ./packages:/app/packages
-      - ./test-scripts:/app/test-scripts
+      - ./fleet-optimizer-postgres.html:/app/public/index.html
 
   # Test Web Interface
   web-test:
-    build:
-      context: ./packages/web
-      dockerfile: ../../test-dockerfiles/Dockerfile.web-test
+    image: node:20-alpine
+    working_dir: /app
     ports:
-      - "3001:3000"
+      - "3005:3000"
     environment:
       - NODE_ENV=test
-      - REACT_APP_API_URL=http://localhost:8001
-      - REACT_APP_WS_URL=ws://localhost:8082
+      - REACT_APP_API_URL=http://localhost:3003
+      - REACT_APP_WS_URL=ws://localhost:3004
     depends_on:
       - api-test
-      - websocket-test
     volumes:
-      - ./packages/web/src:/app/src
+      - .:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev:web"
 
-  # Test Load Balancer
-  nginx-test:
-    image: nginx:alpine
-    ports:
-      - "8080:80"
-    volumes:
-      - ./test-configs/nginx-test.conf:/etc/nginx/nginx.conf
+  # Test Runner
+  tests:
+    build:
+      context: .
+      dockerfile: Dockerfile.test-minimal
+    environment:
+      - NODE_ENV=test
+      - DB_HOST=postgres-test
+      - DB_PORT=5432
+      - DB_NAME=fleet_optimizer_test
+      - DB_USER=test_user
+      - DB_PASSWORD=test_password
+      - REDIS_HOST=redis-test
+      - REDIS_PORT=6379
     depends_on:
-      - api-test
-      - web-test
-
-  # Test Monitoring
-  prometheus-test:
-    image: prom/prometheus:latest
-    ports:
-      - "9091:9090"
+      postgres-test:
+        condition: service_healthy
+      redis-test:
+        condition: service_healthy
     volumes:
-      - ./test-configs/prometheus-test.yml:/etc/prometheus/prometheus.yml
-    command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
-      - '--storage.tsdb.path=/prometheus'
-      - '--web.console.libraries=/etc/prometheus/console_libraries'
-      - '--web.console.templates=/etc/prometheus/consoles'
+      - .:/app
+      - /app/node_modules
+    command: npm test
 
 volumes:
   postgres_test_data:
   redis_test_data:
-
-networks:
-  default:
-    name: openroute-test-network
