@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Fleet Route Optimizer - Simple Map Test</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <style>
+        body { margin: 0; padding: 20px; font-family: Arial, sans-serif; }
+        #map { height: 400px; width: 100%; border: 2px solid #ccc; }
+        .status { padding: 10px; background: #f0f0f0; margin: 10px 0; }
+        .buttons { margin: 10px 0; }
+        button { padding: 10px 15px; margin: 5px; background: #007cba; color: white; border: none; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🚛 Fleet Route Optimizer - Map Test</h1>
+    
+    <div class="status" id="status">Loading map...</div>
+    
+    <div id="map"></div>
+    
+    <div class="buttons">
+        <button onclick="testMap()">🗺️ Test Map</button>
+        <button onclick="addMarker()">📍 Add Marker</button>
+        <button onclick="panToNYC()">🏙️ Go to NYC</button>
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    <script>
+        var statusDiv = document.getElementById('status');
+        var map;
+        
+        // Test if Leaflet loaded
+        if (typeof L === 'undefined') {
+            statusDiv.innerHTML = '❌ Leaflet library failed to load. Check internet connection.';
+            statusDiv.style.background = '#ffebee';
+        } else {
+            try {
+                // Initialize map
+                map = L.map('map').setView([40.7128, -74.0060], 10);
+                
+                // Add tile layer
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors'
+                }).addTo(map);
+                
+                // Add a test marker
+                L.marker([40.7128, -74.0060])
+                    .addTo(map)
+                    .bindPopup('🏙️ New York City<br>Fleet Route Optimizer Demo')
+                    .openPopup();
+                
+                statusDiv.innerHTML = '✅ Map loaded successfully! You should see New York City below.';
+                statusDiv.style.background = '#e8f5e8';
+                
+            } catch (error) {
+                statusDiv.innerHTML = '❌ Error initializing map: ' + error.message;
+                statusDiv.style.background = '#ffebee';
+            }
+        }
+        
+        function testMap() {
+            if (map) {
+                alert('✅ Map is working! Current center: ' + map.getCenter().toString());
+            } else {
+                alert('❌ Map not initialized');
+            }
+        }
+        
+        function addMarker() {
+            if (map) {
+                var lat = 40.7128 + (Math.random() - 0.5) * 0.1;
+                var lng = -74.0060 + (Math.random() - 0.5) * 0.1;
+                L.marker([lat, lng])
+                    .addTo(map)
+                    .bindPopup('🚛 Test Vehicle')
+                    .openPopup();
+            }
+        }
+        
+        function panToNYC() {
+            if (map) {
+                map.setView([40.7128, -74.0060], 12);
+            }
+        }
+    </script>
+</body>
+</html>
