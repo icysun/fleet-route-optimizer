@@ -11,7 +11,7 @@ import { VRPSolver } from '../core/openroute-vrp'
 import { AStarPathfinder } from '../core/openroute-astar'
 import { FleetManager } from '../core/openroute-fleet-manager'
 import { AdvancedRouteOptimizer } from '../core/openroute-advanced'
-import { Vehicle, Delivery, VRPInstance, Position } from '../core/openroute-types'
+import { Vehicle, Delivery, VRPInstance, Position, VRPRoute } from '../core/openroute-types'
 
 const app = express()
 const port = process.env.API_PORT || 3001
@@ -449,7 +449,7 @@ async function optimizeWithPostGIS(instance: VRPInstance, algorithm: string) {
   `)
   
   // Implement algorithm using PostGIS distance calculations
-  const routes = []
+  const routes: VRPRoute[] = []
   const vehicleIndex = 0
   
   // Simple greedy assignment for demonstration

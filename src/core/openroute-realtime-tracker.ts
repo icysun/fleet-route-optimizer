@@ -3,8 +3,16 @@ import {
   TrafficUpdate, 
   RouteDeviation, 
   OptimizedRoute,
-  Position 
+  Position,
+  RouteSegment
 } from './openroute-types'
+
+// Define CloseEvent interface for Node.js compatibility
+interface CloseEvent {
+  code: number
+  reason: string
+  wasClean: boolean
+}
 
 /**
  * Real-time GPS tracking and route monitoring system
@@ -171,10 +179,13 @@ export class RealTimeTracker {
     const nearestSegment = this.findNearestRouteSegment(currentPosition, route)
     if (!nearestSegment) return null
     
+    // Type assertion to help TypeScript understand that nearestSegment is not null here
+    const segment = nearestSegment as RouteSegment
+    
     const distanceFromRoute = this.calculateDistanceToLineSegment(
       currentPosition,
-      nearestSegment.start,
-      nearestSegment.end
+      segment.start,
+      segment.end
     )
     
     if (distanceFromRoute > this.deviationThreshold) {
@@ -365,8 +376,8 @@ export class RealTimeTracker {
     }
   }
   
-  private findNearestRouteSegment(position: Position, route: OptimizedRoute) {
-    let nearestSegment = null
+  private findNearestRouteSegment(position: Position, route: OptimizedRoute): RouteSegment | null {
+    let nearestSegment: RouteSegment | null = null
     let minDistance = Infinity
     
     for (const segment of route.segments) {
