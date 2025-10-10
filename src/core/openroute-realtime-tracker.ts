@@ -351,7 +351,7 @@ export class RealTimeTracker {
     this.onRouteDeviation?.(deviation)
   }
   
-  private heartbeatInterval?: number
+  private heartbeatInterval?: ReturnType<typeof setInterval>
   
   private startHeartbeat(): void {
     this.heartbeatInterval = setInterval(() => {

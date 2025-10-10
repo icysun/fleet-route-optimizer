@@ -591,7 +591,7 @@ app.get('/docs', (req: Request, res: Response) => {
 const server = createServer(app)
 
 // Create WebSocket server for real-time updates
-const wss = new WebSocketServer({ port: wsPort })
+const wss = new WebSocketServer({ port: Number(wsPort) })
 
 wss.on('connection', (ws) => {
   console.log('🔌 WebSocket client connected')

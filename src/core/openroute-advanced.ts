@@ -4,6 +4,7 @@ import {
   OptimizedRoute, 
   OptimizationOptions, 
   OptimizationResult,
+  OptimizationObjective,
   Position 
 } from './openroute-types'
 import { AStarPathfinder } from './openroute-astar'
@@ -78,7 +79,8 @@ export class AdvancedRouteOptimizer {
       return finalResult
       
     } catch (error) {
-      throw new Error(`Route optimization failed: ${error.message}`)
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      throw new Error(`Route optimization failed: ${errorMessage}`)
     }
   }
   
@@ -133,8 +135,8 @@ export class AdvancedRouteOptimizer {
     // Generate solutions optimized for different objective combinations
     for (let i = 0; i < objectives.length; i++) {
       for (let j = i; j < objectives.length; j++) {
-        const weightedObjectives = objectives.map((obj, index) => ({
-          ...obj,
+        const weightedObjectives: OptimizationObjective[] = objectives.map((obj, index) => ({
+          type: obj.type as 'minimize_distance' | 'minimize_time' | 'minimize_cost' | 'maximize_efficiency' | 'balance_load',
           weight: index === i ? 0.7 : index === j ? 0.3 : 0
         }))
         
