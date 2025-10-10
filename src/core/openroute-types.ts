@@ -61,6 +61,8 @@ export interface TimeWindow {
   earliest: Date
   latest: Date
   preferredTime?: Date
+  start?: Date
+  end?: Date
 }
 
 export interface DeliveryRequirements {
@@ -162,8 +164,9 @@ export interface VRPInstance {
   depot: Position
   vehicles: Vehicle[]
   deliveries: Delivery[]
-  distanceMatrix: number[][]
-  timeMatrix: number[][]
+  distanceMatrix?: number[][]
+  timeMatrix?: number[][]
+  objectives?: string[]
   constraints: VRPConstraints
 }
 
@@ -174,6 +177,8 @@ export interface VRPConstraints {
   maxRouteDuration?: number
   maxVehicles?: number
   allowSplitDeliveries: boolean
+  driverHoursConstraints?: boolean
+  vehicleCapacity?: boolean
 }
 
 export interface VRPSolution {

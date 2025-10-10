@@ -7,11 +7,11 @@ import { createClient } from 'redis'
 import path from 'path'
 
 // Import our Fleet Route Optimizer modules
-import { VRPSolver } from '../../openroute-vrp'
-import { AStarPathfinder } from '../../openroute-astar'
-import { FleetManager } from '../../openroute-fleet-manager'
-import { AdvancedRouteOptimizer } from '../../openroute-advanced'
-import { Vehicle, Delivery, VRPInstance, Position } from '../../openroute-types'
+import { VRPSolver } from '../core/openroute-vrp'
+import { AStarPathfinder } from '../core/openroute-astar'
+import { FleetManager } from '../core/openroute-fleet-manager'
+import { AdvancedRouteOptimizer } from '../core/openroute-advanced'
+import { Vehicle, Delivery, VRPInstance, Position } from '../core/openroute-types'
 
 const app = express()
 const port = process.env.API_PORT || 3001
@@ -51,6 +51,20 @@ async function initializeConnections() {
 
 // Initialize Fleet Route Optimizer components
 const vrpSolver = new VRPSolver()
+
+// Create a simple road network for testing
+const roadNetwork = {
+  nodes: new Map(),
+  edges: new Map(),
+  getNeighbors: (nodeId: string) => [],
+  getDistance: (from: string, to: string) => 0,
+  addNode: (id: string, position: Position) => {},
+  addEdge: (from: string, to: string, weight: number) => {}
+}
+
+const routeOptimizer = new AdvancedRouteOptimizer(roadNetwork)
+const pathfinder = new AStarPathfinder(roadNetwork)
+const fleetManager = new FleetManager(`ws://localhost:${wsPort}`)
 
 /**
  * Health check endpoint
@@ -343,7 +357,8 @@ app.post('/api/optimize', async (req: Request, res: Response) => {
         capacityConstraints: true,
         timeWindowConstraints: true,
         driverHoursConstraints: true,
-        maxRouteDistance: 100
+        maxRouteDistance: 100,
+        allowSplitDeliveries: false
       }
     }
     
@@ -626,350 +641,5 @@ async function startServer() {
 }
 
 startServer().catch(console.error)
-
-export default app
-
-// Sample data for demonstration
-let vehicles: Vehicle[] = [
-  {
-    id: 'v1',
-    name: 'Delivery Truck Alpha',
-    position: [40.7589, -73.9851],
-    capacity: 1000,
-    currentLoad: 0,
-    maxRange: 500,
-    fuelLevel: 85,
-    status: 'active',
-    vehicleType: 'truck',
-    restrictions: {
-      maxWeight: 1000,
-      maxVolume: 50,
-      hazmatAllowed: false,
-      refrigerated: true,
-      tollRoadsAllowed: true,
-      accessRestrictions: []
-    }
-  },
-  {
-    id: 'v2', 
-    name: 'Van Beta',
-    position: [40.7505, -73.9860],
-    capacity: 500,
-    currentLoad: 150,
-    maxRange: 300,
-    fuelLevel: 65,
-    status: 'active',
-    vehicleType: 'van'
-  }
-]
-
-let deliveries: Delivery[] = [
-  {
-    id: 'd1',
-    address: '123 Broadway, New York, NY',
-    position: [40.7831, -73.9712],
-    timeWindow: {
-      start: new Date('2025-10-09T09:00:00'),
-      end: new Date('2025-10-09T17:00:00')
-    },
-    priority: 'high',
-    weight: 25,
-    volume: 5,
-    serviceTime: 15,
-    instructions: 'Ring doorbell twice',
-    contact: {
-      name: 'John Smith',
-      phone: '+1-555-0123'
-    }
-  },
-  {
-    id: 'd2',
-    address: '456 5th Avenue, New York, NY', 
-    position: [40.7614, -73.9776],
-    timeWindow: {
-      start: new Date('2025-10-09T10:00:00'),
-      end: new Date('2025-10-09T16:00:00')
-    },
-    priority: 'medium',
-    weight: 15,
-    volume: 3,
-    serviceTime: 10
-  }
-]
-
-// API Routes
-
-/**
- * Health check endpoint
- */
-app.get('/health', (req: Request, res: Response) => {
-  res.json({
-    status: 'healthy',
-    timestamp: new Date().toISOString(),
-    version: '1.0.0',
-    services: {
-      vrp: 'operational',
-      pathfinding: 'operational', 
-      realtime: 'operational'
-    }
-  })
-})
-
-/**
- * Get all vehicles
- */
-app.get('/api/vehicles', (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    data: vehicles,
-    count: vehicles.length
-  })
-})
-
-/**
- * Add a new vehicle
- */
-app.post('/api/vehicles', (req: Request, res: Response) => {
-  const vehicle: Vehicle = {
-    id: `v${vehicles.length + 1}`,
-    ...req.body,
-    status: 'active'
-  }
-  vehicles.push(vehicle)
-  res.status(201).json({
-    success: true,
-    data: vehicle
-  })
-})
-
-/**
- * Get all deliveries
- */
-app.get('/api/deliveries', (req: Request, res: Response) => {
-  res.json({
-    success: true,
-    data: deliveries,
-    count: deliveries.length
-  })
-})
-
-/**
- * Add a new delivery
- */
-app.post('/api/deliveries', (req: Request, res: Response) => {
-  const delivery: Delivery = {
-    id: `d${deliveries.length + 1}`,
-    ...req.body
-  }
-  deliveries.push(delivery)
-  res.status(201).json({
-    success: true,
-    data: delivery
-  })
-})
-
-/**
- * Optimize routes using VRP solver
- */
-app.post('/api/optimize', async (req: Request, res: Response) => {
-  try {
-    const { algorithm = 'clarke-wright' } = req.body
-    
-    const vrpInstance: VRPInstance = {
-      vehicles: vehicles.filter(v => v.status === 'active'),
-      deliveries,
-      depot: [40.7589, -73.9851], // Distribution center
-      objectives: ['minimize_distance', 'minimize_time'],
-      constraints: {
-        vehicleCapacity: true,
-        timeWindows: true,
-        driverWorkingHours: true,
-        fuelConstraints: true
-      }
-    }
-    
-    const startTime = Date.now()
-    let solution
-    
-    switch (algorithm) {
-      case 'clarke-wright':
-        solution = vrpSolver.solveClarkeWright(vrpInstance)
-        break
-      case 'genetic':
-        solution = vrpSolver.solveGeneticAlgorithm(vrpInstance)
-        break
-      case 'advanced':
-        solution = await routeOptimizer.optimizeMultiObjective(vrpInstance)
-        break
-      default:
-        solution = vrpSolver.solveClarkeWright(vrpInstance)
-    }
-    
-    const optimizationTime = Date.now() - startTime
-    
-    res.json({
-      success: true,
-      data: solution,
-      metadata: {
-        algorithm,
-        optimizationTime,
-        vehiclesUsed: solution.routes.length,
-        deliveriesOptimized: deliveries.length
-      }
-    })
-    
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Optimization failed'
-    })
-  }
-})
-
-/**
- * Calculate path between two points using A* algorithm
- */
-app.post('/api/pathfind', async (req: Request, res: Response) => {
-  try {
-    const { start, end } = req.body as { start: Position, end: Position }
-    
-    const path = await pathfinder.findPath(start, end)
-    
-    res.json({
-      success: true,
-      data: {
-        path: path.route,
-        distance: path.totalDistance,
-        duration: path.totalDuration,
-        segments: path.segments
-      }
-    })
-    
-  } catch (error) {
-    res.status(500).json({
-      success: false,
-      error: error instanceof Error ? error.message : 'Pathfinding failed'
-    })
-  }
-})
-
-/**
- * Get fleet statistics
- */
-app.get('/api/fleet/stats', (req: Request, res: Response) => {
-  const activeVehicles = vehicles.filter(v => v.status === 'active')
-  const totalCapacity = vehicles.reduce((sum, v) => sum + v.capacity, 0)
-  const totalLoad = vehicles.reduce((sum, v) => sum + v.currentLoad, 0)
-  const utilizationRate = totalLoad / totalCapacity * 100
-  
-  res.json({
-    success: true,
-    data: {
-      totalVehicles: vehicles.length,
-      activeVehicles: activeVehicles.length,
-      totalDeliveries: deliveries.length,
-      utilizationRate: Math.round(utilizationRate * 100) / 100,
-      averageFuelLevel: vehicles.reduce((sum, v) => sum + v.fuelLevel, 0) / vehicles.length
-    }
-  })
-})
-
-/**
- * API documentation endpoint
- */
-app.get('/docs', (req: Request, res: Response) => {
-  res.send(`
-    <html>
-      <head><title>Fleet Route Optimizer API</title></head>
-      <body style="font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px;">
-        <h1>🚛 Fleet Route Optimizer API Documentation</h1>
-        
-        <h2>Endpoints</h2>
-        <ul>
-          <li><strong>GET /health</strong> - Health check</li>
-          <li><strong>GET /api/vehicles</strong> - Get all vehicles</li>
-          <li><strong>POST /api/vehicles</strong> - Add new vehicle</li>
-          <li><strong>GET /api/deliveries</strong> - Get all deliveries</li>
-          <li><strong>POST /api/deliveries</strong> - Add new delivery</li>
-          <li><strong>POST /api/optimize</strong> - Optimize routes (algorithms: clarke-wright, genetic, advanced)</li>
-          <li><strong>POST /api/pathfind</strong> - Calculate path between two points</li>
-          <li><strong>GET /api/fleet/stats</strong> - Get fleet statistics</li>
-        </ul>
-        
-        <h2>WebSocket</h2>
-        <p>Real-time updates available on port ${wsPort}</p>
-        
-        <h2>Example Usage</h2>
-        <pre>
-// Optimize routes
-POST /api/optimize
-{
-  "algorithm": "clarke-wright"
-}
-
-// Add vehicle
-POST /api/vehicles  
-{
-  "name": "New Truck",
-  "position": [40.7128, -74.0060],
-  "capacity": 1200,
-  "vehicleType": "truck"
-}
-        </pre>
-      </body>
-    </html>
-  `)
-})
-
-// Create HTTP server
-const server = createServer(app)
-
-// Create WebSocket server for real-time updates
-const wss = new WebSocketServer({ port: wsPort })
-
-wss.on('connection', (ws) => {
-  console.log('🔌 WebSocket client connected')
-  
-  // Send initial fleet status
-  ws.send(JSON.stringify({
-    type: 'fleet_status',
-    data: {
-      vehicles,
-      deliveries,
-      timestamp: new Date().toISOString()
-    }
-  }))
-  
-  // Simulate real-time updates
-  const interval = setInterval(() => {
-    // Simulate vehicle position updates
-    vehicles.forEach(vehicle => {
-      if (vehicle.status === 'active') {
-        // Small random movement
-        vehicle.position[0] += (Math.random() - 0.5) * 0.001
-        vehicle.position[1] += (Math.random() - 0.5) * 0.001
-      }
-    })
-    
-    ws.send(JSON.stringify({
-      type: 'vehicle_update',
-      data: vehicles,
-      timestamp: new Date().toISOString()
-    }))
-  }, 5000)
-  
-  ws.on('close', () => {
-    console.log('🔌 WebSocket client disconnected')
-    clearInterval(interval)
-  })
-})
-
-// Start server
-server.listen(port, () => {
-  console.log(`🚛 Fleet Route Optimizer API Server running on port ${port}`)
-  console.log(`📡 WebSocket server running on port ${wsPort}`)
-  console.log(`📚 API Documentation: http://localhost:${port}/docs`)
-  console.log(`🏥 Health Check: http://localhost:${port}/health`)
-})
 
 export default app
