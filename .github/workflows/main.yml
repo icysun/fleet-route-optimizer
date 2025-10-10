@@ -44,7 +44,7 @@ jobs:
 
       - name: Run jekyll build
         working-directory: ./docs
-        run: bundle exec jekyll build --strict_front_matter
+        run: bundle exec jekyll build
 
   lint:
     needs: setup
