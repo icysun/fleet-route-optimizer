@@ -59,7 +59,7 @@
     "leaflet": "^2.0.0-alpha.1",
     "pg": "^8.11.3",
     "redis": "^4.6.10",
-    "socket.io": "^4.7.4",
+    "socket.io": "^4.8.3",
     "ws": "^8.16.0"
   },
   "devDependencies": {
