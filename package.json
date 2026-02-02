@@ -69,7 +69,7 @@
     "@types/pg": "^8.10.7",
     "@typescript-eslint/eslint-plugin": "^6.12.0",
     "@typescript-eslint/parser": "^6.12.0",
-    "artillery": "^2.0.3",
+    "artillery": "^2.0.29",
     "concurrently": "^8.2.2",
     "eslint": "^8.54.0",
     "http-server": "^14.1.1",
